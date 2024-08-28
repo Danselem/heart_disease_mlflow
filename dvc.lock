@@ -1,0 +1,61 @@
+schema: '2.0'
+stages:
+  data_split:
+    cmd: python -m src.data_split
+    deps:
+    - path: data/raw/
+      hash: md5
+      md5: 19f10b9b92a1151530f5e4e38741c055.dir
+      size: 139877024
+      nfiles: 2
+    - path: src/data_split.py
+      hash: md5
+      md5: c99e54c139a973c4abfae5057b0934c0
+      size: 1297
+    outs:
+    - path: data/interim/heart_test.parquet
+      hash: md5
+      md5: 43c2a1ed42d608af8d2010458cd4ca22
+      size: 1274259
+    - path: data/interim/heart_train.parquet
+      hash: md5
+      md5: 5f0f65d6242a28d952b7446af717518f
+      size: 4953918
+  data_cleaning:
+    cmd: python -m src.data_cleaning
+    deps:
+    - path: data/interim/heart_test.parquet
+      hash: md5
+      md5: 43c2a1ed42d608af8d2010458cd4ca22
+      size: 1274259
+    - path: data/interim/heart_train.parquet
+      hash: md5
+      md5: 5f0f65d6242a28d952b7446af717518f
+      size: 4953918
+    - path: src/data_cleaning.py
+      hash: md5
+      md5: 4507e8056ad773ad53faf6e23645ee8f
+      size: 933
+    outs:
+    - path: data/processed/heart_train_cleaned.parquet
+      hash: md5
+      md5: b0f0f0e12b8b2613f3ca2786f9ac0008
+      size: 2319209
+  modeling:
+    cmd: python -m src.modeling
+    deps:
+    - path: data/processed/heart_train_cleaned.parquet
+      hash: md5
+      md5: fab94000f037836ee124cd8fc488194e
+      size: 2319209
+    - path: src/modeling.py
+      hash: md5
+      md5: 896de326c472295014b8cd26d542005b
+      size: 2062
+    params:
+      params.yaml:
+        modeling:
+          n_trials: 500
+          model_family: catboost
+          objective_function: Logloss
+          loss_function: F1
