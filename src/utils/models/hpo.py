@@ -7,7 +7,10 @@ from hyperopt.pyll import scope
 from numpy.typing import ArrayLike
 from sklearn.metrics import accuracy_score, f1_score, precision_score
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction import DictVectorizer
 from xgboost import XGBClassifier
+
+seed = 1024
 
 
 def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
@@ -25,8 +28,9 @@ def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
     Returns:
         A dictionary containing the metrics from training.
     """
+    
     x_train, x_val, y_train, y_val = train_test_split(
-        x_train, y_train, test_size=0.2, random_state=2506)
+        x_train, y_train, test_size=0.2, random_state=seed)
 
     # Load constants/categorical_features from params.yaml
     with open("params.yaml", encoding="utf-8") as file:
@@ -64,22 +68,42 @@ def classification_objective(x_train: ArrayLike, y_train: ArrayLike,
         model = CatBoostClassifier(**params, verbose=False)
         # Train the model
         model.fit(x_train, y_train, eval_set=(x_val, y_val))
-    elif model_family == 'xgboost':
-        model = XGBClassifier(**params)
-        # Train the model
-        model.fit(x_train, y_train, eval_set=[(x_val, y_val)])
 
-    # Predict on the validation set
-    y_pred = model.predict(x_val)
+        # Predict on the validation set
+        y_pred = model.predict(x_val)
+
+    elif model_family == 'xgboost':
+        model = XGBClassifier(**params, enable_categorical=True)
+        # Train the model
+        dv = DictVectorizer(sparse=False)
+
+        # Transform x_train and x_val to dict format
+        x_train_dict = x_train.to_dict(orient='records')
+        x_val_dict = x_val.to_dict(orient='records')
+        x_train_transformed = dv.fit_transform(x_train_dict)
+        x_val_transformed = dv.transform(x_val_dict)
+
+        # Train the model
+        model.fit(x_train_transformed, y_train, eval_set=[(x_val_transformed, y_val)])
+
+        # Predict on the validation set
+        y_val_transformed = dv.transform(x_val_dict)
+        y_pred = model.predict(y_val_transformed)
+
+    else:
+        raise ValueError(f"Unsupported model_family '{model_family}'. "
+                         "Supported families are 'catboost' and 'xgboost'.")
+
     # Calculate the loss
     if loss_function == 'F1':
-        loss = 1 - f1_score(y_val, y_pred, pos_label="Yes")
+        loss = 1 - f1_score(y_val, y_pred, pos_label=1)
     elif loss_function == 'Accuracy':
         loss = 1 - accuracy_score(y_val, y_pred)
     elif loss_function == 'Precision':
-        loss = 1 - precision_score(y_val, y_pred, pos_label="Yes")
+        loss = 1 - precision_score(y_val, y_pred, pos_label=1)
 
     return {'loss': loss, 'status': STATUS_OK}
+
 
 
 def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
@@ -108,7 +132,7 @@ def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
                 'min_samples_split', 2, 10, 1)),
             'min_samples_leaf': scope.int(hp.quniform(
                 'min_samples_leaf', 1, 5, 1)),
-            'random_state': 2506
+            'random_state': seed
         }
 
     elif model_family == "catboost":
@@ -163,11 +187,11 @@ def classification_optimization(x_train: ArrayLike, y_train: ArrayLike,
             'max_depth': scope.int(hp.quniform('max_depth', 1, 20, 1)),
             'n_estimators': scope.int(hp.quniform('n_estimators', 10, 50, 1)),
             'learning_rate': hp.quniform('learning_rate', 0.001, 0.3, 0.01),
-            'random_state': 2506
+            'random_state': seed
         }
 
     # For reproducible results
-    rstate = np.random.default_rng(2506)
+    rstate = np.random.default_rng(seed)
     trials = Trials()
     best_params = fmin(
         fn=lambda params: classification_objective(

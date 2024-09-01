@@ -166,3 +166,4 @@ catboost_info/
 *.pkl
 sample_input.json
 data/raw/heart_2022_with_nans.csv
+data/processed/

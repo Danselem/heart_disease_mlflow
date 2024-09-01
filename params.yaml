@@ -1,6 +1,6 @@
 modeling:
-  n_trials: 500
-  model_family: catboost
+  n_trials: 2
+  model_family: random_forest #catboost, random_forest, xgboost
   objective_function: Logloss # Logloss, CrossEntropy
   loss_function: F1 # Precision, F1, Accuracy
 

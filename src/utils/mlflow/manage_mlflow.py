@@ -12,12 +12,17 @@ from mlflow.tracking import MlflowClient
 from numpy.typing import ArrayLike
 from sklearn.metrics import accuracy_score, f1_score, precision_score
 from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction import DictVectorizer
 from xgboost import XGBClassifier
 
 from src.utils.models.plotoutputs import plot_confusion_matrix
+from src import logger
+
+os.environ["MLFLOW_ENABLE_SYSTEM_METRICS_LOGGING"] = "true"
 
 DAGSHUB_REPO_OWNER = "Danselem"
 DAGSHUB_REPO = "heart_disease_mlflow"
+seed = 1024
 
 def config_mlflow() -> None:
     """Configure MLflow to log metrics to the Dagshub repository
@@ -28,24 +33,38 @@ def config_mlflow() -> None:
     load_dotenv()
     os.environ["MLFLOW_TRACKING_USERNAME"] = DAGSHUB_REPO_OWNER
     os.environ["MLFLOW_TRACKING_PASSWORD"] = os.getenv("DAGSHUB_TOKEN")
-    mlflow.set_tracking_uri("https://dagshub.com/{}/{}".format(DAGSHUB_REPO_OWNER,DAGSHUB_REPO))
+    mlflow.set_tracking_uri("https://dagshub.com/{}/{}.mlflow".format(
+        DAGSHUB_REPO_OWNER,DAGSHUB_REPO))
 
     mlflow.autolog()
-    np.random.seed(2506)
-    random.seed(2506)
-    os.environ['PYTHONHASHSEED'] = str(2506)
-
+    seed = 1024
+    np.random.seed(seed)
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
 
 def create_mlflow_experiment(experiment_name: str) -> None:
-    """Create a MLFlow experiment. First set the MLFlow credentials using
-    config_mlflow() and then create the experiment."""
+    """Create an MLflow experiment. Set the MLflow credentials using
+    config_mlflow() and then create or set the experiment."""
+    
     config_mlflow()
-    # First create the experiment if it doesn't exist
-    try:
-        mlflow.create_experiment(experiment_name)
-    except mlflow.exceptions.MlflowException:
-        pass
+    
+    # Check if the experiment already exists
+    experiment = mlflow.get_experiment_by_name(experiment_name)
+    if experiment is None:
+        try:
+            # Create a new experiment if it doesn't exist
+            mlflow.create_experiment(experiment_name)
+            logger.info(f"MLflow experiment '{experiment_name}' created.")
+        except mlflow.exceptions.MlflowException as e:
+            logger.error(f"Failed to create MLflow experiment '{experiment_name}': {e}")
+            raise  # Re-raise the exception after logging
+    else:
+        logger.info(f"MLflow experiment '{experiment_name}' already exists.")
+    
+    # Set the active experiment
     mlflow.set_experiment(experiment_name)
+    logger.info(f"MLflow experiment set to '{experiment_name}'.")
+
 
 
 def register_best_model(model_family: str, loss_function: str) -> None:
@@ -55,6 +74,7 @@ def register_best_model(model_family: str, loss_function: str) -> None:
         model_family (str): Model family to optimize
         loss_function (str): Loss function to optimize
     """
+    
     client = MlflowClient()
     # Select the model with the lowest loss_function
     experiment = client.get_experiment_by_name(f"{model_family}_experiment")
@@ -82,7 +102,7 @@ def register_best_experiment(
     """
     total_samples_size = x_train.shape[0]
     x_train, x_val, y_train, y_val = train_test_split(
-        x_train, y_train, test_size=0.2, random_state=2506)
+        x_train, y_train, test_size=0.2, random_state=seed)
 
     # Load constants/categorical_features from params.yaml
     with open("params.yaml", encoding="utf-8") as file:
@@ -94,8 +114,9 @@ def register_best_experiment(
         model = CatBoostClassifier(**best_params, verbose=False)
         # Train the model
         model.fit(x_train, y_train, eval_set=(x_val, y_val))
+    
     elif model_family == 'xgboost':
-        model = XGBClassifier(**best_params)
+        model = XGBClassifier(**best_params, enable_categorical=True)
         # Train the model
         model.fit(x_train, y_train, eval_set=[(x_val, y_val)])
 
@@ -109,14 +130,14 @@ def register_best_experiment(
         mlflow.log_params(best_params)
         # Log metrics
         mlflow.log_metric("accuracy", accuracy_score(y_val, test_hat))
-        mlflow.log_metric("f1", f1_score(y_val, test_hat, pos_label="Yes"))
+        mlflow.log_metric("f1", f1_score(y_val, test_hat, pos_label=1))
         mlflow.log_metric("precision", precision_score(
-            y_val, test_hat, pos_label="Yes"))
+            y_val, test_hat, pos_label=1))
         mlflow.log_metric("train_accuracy", accuracy_score(y_train, train_hat))
         mlflow.log_metric("train_f1", f1_score(
-            y_train, train_hat, pos_label="Yes"))
+            y_train, train_hat, pos_label=1))
         mlflow.log_metric("train_precision", precision_score(
-            y_train, train_hat, pos_label="Yes"))
+            y_train, train_hat, pos_label=1))
         mlflow.log_param("loss_function", loss_function)
         mlflow.log_param("total_samples_size", total_samples_size)
 
