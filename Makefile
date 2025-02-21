@@ -54,16 +54,16 @@ dvc:
 	uv run dvc repro
 
 build_docker:
-	uv run docker build -t indicators-of-heart-disease .
+	uv run docker build -t heart-disease .
 
 run_docker:
-	uv run docker run -d -p 80:80 indicators-of-heart-disease
+	uv run docker run -d -p 80:80 heart-disease
 
 build: quality_checks test
 	echo "Building package"
 	uv run -m src.gather_mlflow_model
-	docker build . -t pedrochitarra/indicators-of-heart-disease:latest
+	docker build . -t Danselem/heart-disease:latest
 
 publish: build
 	echo "Publishing package"
-	docker push pedrochitarra/indicators-of-heart-disease:latest
+	docker push Danselem/heart-disease:latest
