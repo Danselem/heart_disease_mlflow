@@ -1,229 +1,280 @@
 <p align="center">
   <a href="" rel="noopener">
- <img width=300px height=150px src="https://www.tbecker.com.br/uploads/images/2017/04/adote-12-medidas-para-proteger-a-saude-do-coracao-1493058672.jpg" alt="Heart Disease"></a>
+    <img width=400px height=200px src="https://dvl2h13awlxkt.cloudfront.net/assets/general-images/Knowledge/_1200x630_crop_center-center_82_none/CVD-iStock-1266230179.jpg?mtime=1653282867" alt="Heart Disease">
+  </a>
 </p>
 
-<h3 align="center">Indicators of Heart Disease</h3>
+<h2 align="center">🩺 Predicting Heart Disease: An MLOps Approach</h2>
 
-<p align="center"> Project aimed to learn MLOps concepts and apply them to a real-world dataset. <br> 
+<p align="center">
+  A hands-on project leveraging MLOps best practices to build, deploy, and monitor a heart disease prediction model. <br>
 </p>
 
-# 🧐 Problem description <a name = "about"></a>
-Welcome to the Indicators of Heart Disease repository, an educational project
-that aims to predict the presence of heart disease in patients based on telephonic interviews.
 
-This dataset will be used to create the final project of the MLOps Zoomcamp course,
-ministrated by [DataTalks.Club](https://datatalks.club/).
+# 🧐 Problem Description <a name="about"></a>
 
-The original repository can be found
-[here](https://github.com/DataTalksClub/mlops-zoomcamp/tree/main).
+Heart disease remains one of the leading causes of death worldwide, with key risk factors including high blood pressure, high cholesterol, obesity, smoking, and lack of physical activity. Early detection and prediction of heart disease can play a crucial role in preventive healthcare and patient outcomes.
 
-The dataset used in this project can be found on Kaggle, and it can be accessed
-[here](https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease).
+This project leverages machine learning techniques to predict the likelihood of heart disease based on self-reported health indicators collected via telephonic surveys. The dataset, sourced from the Centers for Disease Control and Prevention (CDC), is part of the Behavioral Risk Factor Surveillance System (BRFSS), which conducts annual health-related surveys across the United States.
 
-As per the dataset description:
+### 📌 Project Scope
+The goal of this project is to develop an end-to-end MLOps pipeline that automates the training, deployment, and monitoring of a machine learning model capable of predicting heart disease risk. This includes:
+- **Data Preprocessing:** Handling missing values, encoding categorical variables, and feature engineering.
+- **Model Training & Evaluation:** Applying classification algorithms such as logistic regression, random forests, and gradient boosting.
+- **Deployment & MLOps Integration:** Serving the trained model via a REST API using Flask and Docker, while leveraging CI/CD pipelines and model monitoring to ensure performance and reliability.
+- **Scalability & Reproducibility:** Utilizing cloud-based storage and MLflow for model tracking and versioning.
 
-"What subject does the dataset cover?
+### 📊 Dataset Information
+The dataset consists of 40 features derived from nearly 300 original variables, carefully curated to represent key indicators of heart disease. It includes factors such as BMI, smoking status, alcohol consumption, diabetes history, and physical activity levels. Given its real-world nature, the dataset presents challenges such as class imbalance, requiring thoughtful model selection and evaluation strategies.
 
-According to the CDC, heart disease is a leading cause of death for people of most races in the U.S.. About half of all Americans (47%) have at least 1 of 3 major risk factors for heart disease: high blood pressure, high cholesterol, and smoking. 
+- **Source:** [Kaggle - Personal Key Indicators of Heart Disease](https://www.kaggle.com/datasets/kamilpytlak/personal-key-indicators-of-heart-disease)
+- **Original Data Provider:** CDC’s Behavioral Risk Factor Surveillance System (BRFSS)
+- **Class Distribution:** Imbalanced (fewer positive cases of heart disease)
 
-Other key indicators include diabetes status, obesity (high BMI), not getting enough physical activity, or drinking too much alcohol. Identifying and preventing the factors that have the greatest impact on heart disease is very important in healthcare. In turn, developments in computing allow the application of machine learning methods to detect "patterns" in the data that can predict a patient's condition."
+### 🚀 Why This Matters
+With the increasing availability of health-related data, applying MLOps principles to healthcare prediction models ensures not only the accuracy and reliability of predictions but also the ability to seamlessly deploy, maintain, and monitor models in production. This project demonstrates the power of machine learning in solving real-world healthcare challenges while emphasizing best practices in MLOps.
 
-"Where did the data set come from and what treatments has it undergone?
+This repository serves as an educational portfolio project and was developed as part of the [MLOps Zoomcamp](https://datatalks.club/courses.html) by DataTalks.Club.
 
-The dataset originally comes from the CDC and is a major part of the Behavioral Risk Factor Surveillance System (BRFSS), which conducts annual telephone surveys to collect data on the health status of U.S. residents. In this dataset, I noticed many factors (questions) that directly or indirectly influence heart disease, so I decided to select the most relevant variables from it. I also decided to share with you two versions of the most recent dataset: with NaNs and without it."
+---
 
-"What can you do with this data set?
+## 🏆 Modeling
 
-As described above, the original dataset of nearly 300 variables was reduced to 40 variables. In addition to classical EDA, this dataset can be used to apply a number of machine learning methods, especially classifier models (logistic regression, SVM, random forest, etc.).
+The model's performance is evaluated using the **F1 score**, which is particularly effective for handling imbalanced datasets. Given that heart disease is relatively rare in the dataset, the F1 score ensures a balanced assessment between precision and recall, helping to optimize the model for real-world use cases.
 
-You should treat the variable "HadHeartAttack" as binary ("Yes" - respondent had heart disease; "No" - respondent did not have heart disease). Note, however, that the classes are unbalanced".
+## 🔍 Overview <a name="overview"></a>
 
-So, given the full credits to the dataset creator for describing the problem and giving us the opportunity to work with this dataset, the project can be started. The dataset selected is the one with NaNs, as it is the most realistic scenario.
-
-## Modeling
-
-The models' performance will be evaluated using the F1 score, as it is a good metric to evaluate the model's performance when the classes are unbalanced.
-
-## Overview <a name = "overview"></a>
-
-The tools used in this project can be found in the image below:
+This project integrates multiple tools and frameworks to streamline the machine learning lifecycle. The image below highlights the core technologies used:
 
 ![Tools](docs/tools.jpg)
 
-## 🔎 EDA <a name = "eda"></a>
+## 📊 Exploratory Data Analysis (EDA) <a name="eda"></a>
 
-Before any model is created, it is important to understand the dataset and its features. This is done through Exploratory Data Analysis (EDA), which is a process of analyzing data sets to summarize their main characteristics, often with visual methods.
+Before model development, a comprehensive **Exploratory Data Analysis (EDA)** is conducted to gain insights into the dataset’s structure, distributions, and feature correlations. EDA helps identify missing values, outliers, and potential data transformations to improve model performance.
 
-The folder notebooks contains the EDA notebook, where the dataset is analyzed and the features are understood.
+The **`notebooks/`** directory contains a dedicated EDA notebook where the dataset is thoroughly analyzed. This step lays the foundation for feature selection and engineering.
 
-# 🧪 Experiment tracking and model registry <a name = "experiment"></a>
+## 🧪 Experiment Tracking & Model Registry <a name="experiment"></a>
 
-The project uses MLflow to track experiments and register models. MLflow is an open-source platform to manage the end-to-end machine learning lifecycle. It helps with experiment tracking, reproducibility, and deployment.
+To ensure reproducibility and effective model management, this project utilizes **MLflow** for experiment tracking and model registry. MLflow facilitates:
+- Logging and comparing multiple model runs.
+- Tracking hyperparameters and performance metrics.
+- Registering and versioning models for deployment.
 
-MLFlow documentation can be found [here](https://www.mlflow.org/docs/latest/index.html).
+### 📌 Key Resources:
+- **MLflow Documentation:** [Read More](https://www.mlflow.org/docs/latest/index.html)
+- **Project Hosting on DagsHub:** [View Project](https://dagshub.com/Danselem/heart_disease_mlflow)
+- **MLflow Experiment Server on DagsHub:** [Access Here](https://dagshub.com/Danselem/heart_disease_mlflow/experiments)
 
-The project is hosted in [DagsHub](https://dagshub.com/Danselem/heart_disease_mlflow), and the MLFlow experiment server can be accessed [here](https://dagshub.com/Danselem/heart_disease_mlflow/experiments).
+DagsHub integrates **DVC**, **MLflow**, and **Git**, providing a unified environment for managing experiments, model artifacts, and version control.
 
-In Dagshub, the experiments are tracked and the models are registered. The models can be downloaded and used in other applications. Also, it integrates DVC, MLFlow and the Git repo, making it easier to track the experiments, models and code.
+## 🔄 Workflow Orchestration <a name="workflow"></a>
 
-# 🔄 Workflow orchestration <a name = "workflow"></a>
+This project employs **Data Version Control (DVC)** to orchestrate the workflow. DVC provides:
+- Version control for datasets, models, and intermediate files.
+- Seamless integration with Git, ensuring that data and code are versioned together.
+- Reproducibility by enabling easy rollback to previous states.
 
-The project uses DVC to orchestrate the workflow. DVC is an open-source version control system for machine learning projects. It is designed to handle large files, data sets, machine learning models, and metrics as well as code. Also, it is designed to work with Git and associate each Git commit with a unique DVC commit, in a way that the data, and code are all versioned together.
+### 📌 Key Resource:
+- **DVC Documentation:** [Read More](https://dvc.org/doc)
 
-DVC documentation can be found [here](https://dvc.org/doc).
+## ⚙️ Model Deployment <a name="deployment"></a>
 
-# ⚙️ Model deployment <a name = "deployment"></a>
+The trained model is deployed as a **REST API** using **FastAPI**, making it accessible for real-time predictions. The deployment pipeline includes:
+- **Containerization with Docker** to ensure portability.
+- **Scalability** for serving multiple inference requests.
+- **Endpoint exposure** via `app/main.py` for seamless integration.
 
-The model is deployed using FastAPI, as seen at `app/main.py` script. The image
-is built and can be used to generate predictions as well, available at
-[here](https://hub.docker.com/repository/docker/pedrochitarra/indicators-of-heart-disease).
+The containerized image is publicly available and can be pulled from Docker Hub:
+- **Docker Repository:** [View Here](https://hub.docker.com/repository/docker/Danselem/indicators-of-heart-disease)
 
-# 🔬 Model monitoring <a name = "monitoring"></a>
+## 📈 Model Monitoring <a name="monitoring"></a>
 
-The model is monitored using Evidently, a Python library for interactive analytics
-and monitoring of machine learning models. It is used to monitor the model's
-performance and to understand the model's behavior over time. The docs can be
-accessed at [here](https://evidentlyai.com/).
+To track model performance over time, the project integrates **Evidently**, **PostgreSQL**, and **Grafana** for interactive monitoring and analytics.
 
-Also, in the simulation is used a database to store the predictions and the
-metrics, so it can be used to monitor the model's performance over time. Postgres
-was used as the database, and the docs can be accessed at [here](https://www.postgresql.org/).
+### 📌 Monitoring Components:
+1. **Evidently** – Provides insights into model drift, data drift, and feature importance.  
+   - **Documentation:** [Read More](https://evidentlyai.com/)
+2. **PostgreSQL** – Stores model predictions and performance metrics for historical analysis.  
+   - **Documentation:** [Read More](https://www.postgresql.org/)
+3. **Grafana** – Visualizes key metrics and trends, helping to detect performance degradation.  
+   - **Documentation:** [Read More](https://grafana.com/docs/grafana/latest/)
 
-Grafana is used to visualize the metrics and the predictions, so it can be
-understood how the model is performing. The docs can be accessed at
-[here](https://grafana.com/docs/grafana/latest/).
+### 📊 Simulation & Monitoring Process:
+- The model is simulated on multiple data batches (500 samples per batch).
+- A **daily batch processing scenario** is simulated, where new data is processed each day.
+- **Metrics are stored in PostgreSQL** and visualized in **Grafana dashboards**.
 
-The simulation is for many batches with 500 samples each and it was simulated
-that every day a batch is processed. The metrics are stored in the database and
-can be accessed by Grafana.
+Below is an example of the real-time monitoring dashboard:
 
-The dashboard can be viewed at the image below:
 ![Dashboard](docs/dashboard.png)
+  
 
-# 🖥️ Reproducibility <a name = "reproducibility"></a>
+# 🖥️ Reproducibility <a name="reproducibility"></a>
 
-The model can be created by running the pipeline defined in `dvc.yaml`. To run the pipeline, type the command below on the command line:
+To ensure **reproducibility**, the entire pipeline is defined in `dvc.yaml`. Running the pipeline will automatically execute necessary steps, ensuring consistency in data processing, model training, and evaluation.
+
+## 🚀 Running the Pipeline
+
+To execute the full pipeline, run:
 
 ```bash
 make dvc
 ```
 
-It will check the stages that are already
-completed and will run the stages that are not completed yet. At the end, the
-model will be created and the metrics will be saved at the MLFlow server.
+This command checks which stages have already been completed and only runs the remaining ones. Upon completion, the trained model and metrics will be stored in the **MLflow server**.
 
-With a model created, it can be downloaded using the command:
+Once the model is trained, it can be downloaded with:
 
 ```bash
 make save_model
 ```
 
-To run the workflow step by step, kindly follow the steps:
+## 🛠️ Step-by-Step Workflow
 
-### Installation
+Follow these steps to set up and execute the project:
+
+### 1️⃣ Installation
 ---
-To get started with the Project, follow these steps:
-
 Clone the repository:
+
 ```bash
 git clone https://github.com/Danselem/heart_disease_mlflow.git
 ```
 
-Change directory
+Navigate into the project directory:
 
 ```bash
 cd heart_disease_mlflow
 ```
 
-Installing uv Use the [link](https://docs.astral.sh/uv/getting-started/installation/) to install `uv` depending on your platform.
-
-
-### Initialize the Environment and Install dependencies
+### 2️⃣ Set Up the Environment
+---
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/) according to your platform, then install dependencies:
 
 ```bash
 make install
 ```
-Set up environmental variables
+
+Set up environment variables:
 
 ```bash
 make env
 ```
-Then fill in the required keys and `DAGHSHUB REPO` name in `.env`.
 
-### Load and split data
-Next, load and split data:
+Then, update `.env` with the required credentials and **DagsHub repository** details.
+
+### 3️⃣ Load and Prepare Data
+---
+Split the dataset:
+
 ```bash
 make spdata
 ```
 
-### Clean the data
+Clean the data:
 
 ```bash
 make cleandata
 ```
 
-### Train and optimize model
+### 4️⃣ Train and Optimize the Model
+---
+Train the model:
 
 ```bash
 make model
 ```
 
-You can edit `params.yaml` file and run `make model` again to train a different model and update in Dagshub.
+Modify `params.yaml` to experiment with different hyperparameters, then retrain the model using the command above.  
 
-If you are satisfied, you can fetch the best model with:
+Once satisfied with the performance, fetch the best model:
 
 ```bash
 make save_model
 ```
-This will download the best model based on the model_family defined in `params.yaml`, the model will be downloaded and
-saved at the root folder as a `model.pkl` file.
 
-### Model Serving
+This downloads the **best-performing model** as `model.pkl` for deployment.
 
-To serve the model, generate a sample data as json:
+### 5️⃣ Model Serving
+---
+Generate a sample input JSON:
 
 ```bash
 make sample
 ```
 
-Test the model locally:
+Run the model locally:
 
 ```bash
 make serve_local
 ```
 
-#### Create Docker Image
-To create a docker image, run
+### 6️⃣ Deploy with Docker
+---
+To containerize the model, build a **Docker image**:
+
 ```bash
 make build_docker
 ```
 
-Then 
+Run the **Docker container**:
+
 ```bash
 make run_docker
 ```
 
-This will start the docker container.
-
-To generate predictions, run
+Once the container is running, generate predictions by executing:
 
 ```bash
 make serve
 ```
 
-# 🪖 Best practices <a name = "best_practices"></a>
-For every commit, the CI/CD pipeline is triggered. It checks the code quality
-using flake8 and if there are any errors, the pipeline fails. The `.pre-commit-config.yaml`
-file has the rules that are checked before every commit. It can be installed
-locally also to avoid waiting for the CI/CD pipeline to check the code quality.
-It can be installed by running the command `pre-commit install` and then check
-the code quality by running `pre-commit run --all-files`.
+This ensures the model is deployed and can be accessed via API for real-world inference.
 
-Also there's a Makefile that has the commands to run tests, check the code quality
-and to build and push the image to Docker Hub. The commands can be run by executing
-`make publish`.
 
-## License
+## 🪖 Best Practices <a name="best_practices"></a>
 
-This project is licensed under the MIT License. See the [License](./LICENSE) file for more details.
+This project follows **best practices** to ensure code quality, maintainability, and smooth deployment. 
+
+### ✅ Continuous Integration & Code Quality Checks  
+
+Every commit triggers a **CI/CD pipeline** that performs **static code analysis** using `flake8`. If any errors are detected, the pipeline fails, ensuring that only high-quality code is merged.  
+
+To enforce code quality checks locally, **pre-commit hooks** are configured in `.pre-commit-config.yaml`. These hooks can be installed and executed before committing changes, avoiding delays caused by waiting for CI/CD validation.
+
+### 🛠️ Setting Up Pre-Commit Locally
+
+Install pre-commit hooks:
+
+```bash
+pre-commit install
+```
+
+Run pre-commit checks on all files:
+
+```bash
+pre-commit run --all-files
+```
+
+### 📦 Makefile Automation  
+
+A **Makefile** is provided to streamline development tasks, including:
+
+- Running tests  
+- Checking code quality  
+- Building and pushing Docker images  
+
+To execute all necessary checks and publish the Docker image, simply run:
+
+```bash
+make publish
+```
+
+---
+
+### 📝 License  
+
+This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for full details.
+
+
