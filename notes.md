@@ -22,5 +22,14 @@ git branch -M main
 
 git remote add origin https://github.com/Danselem/heart_disease_mlflow.git
 
+make build_docker
+
+curl http://localhost:80
+
+docker run -d -p 80:80 indicators-of-heart-disease
+
+docker run -d -p 80:80 indicators-of-heart-disease
+
+
 
 

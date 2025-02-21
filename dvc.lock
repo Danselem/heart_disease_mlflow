@@ -1,61 +1,61 @@
 schema: '2.0'
 stages:
   data_split:
-    cmd: python -m src.data_split
+    cmd: uv run -m src.data_split
     deps:
     - path: data/raw/
       hash: md5
-      md5: 19f10b9b92a1151530f5e4e38741c055.dir
-      size: 139877024
-      nfiles: 2
+      md5: d65ea4088f8217bbaa1204de8492657d.dir
+      size: 12316333
+      nfiles: 1
     - path: src/data_split.py
       hash: md5
-      md5: c99e54c139a973c4abfae5057b0934c0
-      size: 1297
+      md5: 3d7970321e1b5ca9e262e1bd48a22460
+      size: 1358
     outs:
     - path: data/interim/heart_test.parquet
       hash: md5
-      md5: 43c2a1ed42d608af8d2010458cd4ca22
-      size: 1274259
+      md5: 6d1dbe16980ef9bdb05655e11bb535e9
+      size: 1270256
     - path: data/interim/heart_train.parquet
       hash: md5
-      md5: 5f0f65d6242a28d952b7446af717518f
-      size: 4953918
+      md5: c44fb2f2af59e7e98098fcb4aad6caeb
+      size: 4949802
   data_cleaning:
-    cmd: python -m src.data_cleaning
+    cmd: uv run -m src.data_cleaning
     deps:
     - path: data/interim/heart_test.parquet
       hash: md5
-      md5: 43c2a1ed42d608af8d2010458cd4ca22
-      size: 1274259
+      md5: 6d1dbe16980ef9bdb05655e11bb535e9
+      size: 1270256
     - path: data/interim/heart_train.parquet
       hash: md5
-      md5: 5f0f65d6242a28d952b7446af717518f
-      size: 4953918
+      md5: c44fb2f2af59e7e98098fcb4aad6caeb
+      size: 4949802
     - path: src/data_cleaning.py
       hash: md5
-      md5: 4507e8056ad773ad53faf6e23645ee8f
-      size: 933
+      md5: 87951677892ae5985c2d28c90b0413c2
+      size: 2809
     outs:
     - path: data/processed/heart_train_cleaned.parquet
       hash: md5
-      md5: b0f0f0e12b8b2613f3ca2786f9ac0008
-      size: 2319209
+      md5: 928702da7e0ea7aee7ae1049c43b93ce
+      size: 2315281
   modeling:
-    cmd: python -m src.modeling
+    cmd: uv run -m src.modeling
     deps:
     - path: data/processed/heart_train_cleaned.parquet
       hash: md5
-      md5: b0f0f0e12b8b2613f3ca2786f9ac0008
-      size: 2319209
+      md5: 928702da7e0ea7aee7ae1049c43b93ce
+      size: 2315281
     - path: src/modeling.py
       hash: md5
-      md5: b42d1aa47fb840c082430683b749fefd
-      size: 2641
+      md5: 0552319d5d72d7377dab32c357275a69
+      size: 4249
     params:
       params.yaml:
         modeling:
-          n_trials: 100
-          model_family: catboost
+          n_trials: 5
+          model_family: random_forest
           objective_function: Logloss
           loss_function: F1

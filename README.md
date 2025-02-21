@@ -63,7 +63,7 @@ The project uses MLflow to track experiments and register models. MLflow is an o
 
 MLFlow documentation can be found [here](https://www.mlflow.org/docs/latest/index.html).
 
-The MLFlow server is hosted at DagsHub, and the experiments can be accessed [here](https://dagshub.com/pedrochitarra/indicators-of-heart-disease).
+The project is hosted in [DagsHub](https://dagshub.com/Danselem/heart_disease_mlflow), and the MLFlow experiment server can be accessed [here](https://dagshub.com/Danselem/heart_disease_mlflow/experiments).
 
 In Dagshub, the experiments are tracked and the models are registered. The models can be downloaded and used in other applications. Also, it integrates DVC, MLFlow and the Git repo, making it easier to track the experiments, models and code.
 
@@ -103,18 +103,114 @@ The dashboard can be viewed at the image below:
 
 # 🖥️ Reproducibility <a name = "reproducibility"></a>
 
-The model can be created running the pipeline defined at the `dvc.yaml` file by
-executing the command `dvc repro`. It will check the stages that are already
-computed and will run the stages that are not computed yet. At the end, the
+The model can be created by running the pipeline defined in `dvc.yaml`. To run the pipeline, type the command below on the command line:
+
+```bash
+make dvc
+```
+
+It will check the stages that are already
+completed and will run the stages that are not completed yet. At the end, the
 model will be created and the metrics will be saved at the MLFlow server.
 
-With a model created, it can be downloaded using the `src/gather_mlflow_model.py`
-script. By the model_family set at `params.yaml`, the model will be downloaded and
-saved at the root folder as a .pkl file.
+With a model created, it can be downloaded using the command:
 
-Then, the image can be created by running the command
-`docker build -t indicators-of-heart-disease .` at the root folder.
-The image will be created and can be used to generate predictions.
+```bash
+make save_model
+```
+
+To run the workflow step by step, kindly follow the steps:
+
+### Installation
+---
+To get started with the Project, follow these steps:
+
+Clone the repository:
+```bash
+git clone https://github.com/Danselem/heart_disease_mlflow.git
+```
+
+Change directory
+
+```bash
+cd heart_disease_mlflow
+```
+
+Installing uv Use the [link](https://docs.astral.sh/uv/getting-started/installation/) to install `uv` depending on your platform.
+
+
+### Initialize the Environment and Install dependencies
+
+```bash
+make install
+```
+Set up environmental variables
+
+```bash
+make env
+```
+Then fill in the required keys and `DAGHSHUB REPO` name in `.env`.
+
+### Load and split data
+Next, load and split data:
+```bash
+make spdata
+```
+
+### Clean the data
+
+```bash
+make cleandata
+```
+
+### Train and optimize model
+
+```bash
+make model
+```
+
+You can edit `params.yaml` file and run `make model` again to train a different model and update in Dagshub.
+
+If you are satisfied, you can fetch the best model with:
+
+```bash
+make save_model
+```
+This will download the best model based on the model_family defined in `params.yaml`, the model will be downloaded and
+saved at the root folder as a `model.pkl` file.
+
+### Model Serving
+
+To serve the model, generate a sample data as json:
+
+```bash
+make sample
+```
+
+Test the model locally:
+
+```bash
+make serve_local
+```
+
+#### Create Docker Image
+To create a docker image, run
+```bash
+make build_docker
+```
+
+Then 
+```bash
+make run_docker
+```
+
+This will start the docker container.
+
+To generate predictions, run
+
+```bash
+make serve
+```
 
 # 🪖 Best practices <a name = "best_practices"></a>
 For every commit, the CI/CD pipeline is triggered. It checks the code quality
@@ -127,3 +223,7 @@ the code quality by running `pre-commit run --all-files`.
 Also there's a Makefile that has the commands to run tests, check the code quality
 and to build and push the image to Docker Hub. The commands can be run by executing
 `make publish`.
+
+## License
+
+This project is licensed under the MIT License. See the [License](./LICENSE) file for more details.

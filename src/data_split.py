@@ -1,6 +1,7 @@
 """Script to split the Indicators of Heart Disease dataset into training and
 testing sets."""
 import pandas as pd
+from pathlib import Path
 from sklearn.model_selection import train_test_split
 from src import logger
 
@@ -9,7 +10,8 @@ from src import logger
 def load_data():
     """Load the Indicators of Heart Disease dataset"""
     logger.info("Loading the dataset")
-    data = pd.read_csv('data/raw/heart_2022_with_nans.csv')
+    data_path = Path('data/raw/heart_2022_with_nans.csv.zip')
+    data = pd.read_csv(data_path)
     logger.info("Dataset loaded successfully")
     return data
 

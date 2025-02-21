@@ -31,3 +31,4 @@ def plot_confusion_matrix(y_real: ArrayLike, y_pred: ArrayLike,
             plt.text(j, i, f"{cm[i, j]}", ha='center', va='center',
                      color='red')
     plt.savefig(f"{train_or_test}_confusion_matrix.png")
+    plt.close()

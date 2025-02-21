@@ -163,7 +163,6 @@ cython_debug/
 
 mlruns/
 catboost_info/
-*.pkl
+model.pkl
 sample_input.json
-data/raw/heart_2022_with_nans.csv
-data/processed/
+# data/processed/

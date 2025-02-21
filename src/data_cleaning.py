@@ -9,7 +9,6 @@ from src import logger
 
 
 
-
 def clean_data(data: pd.DataFrame) -> pd.DataFrame:
     """Cleans the dataset by removing missing values and duplicates
 
@@ -46,14 +45,17 @@ def transform_and_save_data(data: pd.DataFrame, x_save_path: Path,
 
         # Save transformed x and y variables
         
-        np.save(x_save_path, x_train_transformed)
+        logger.info(f"Saving x_train to {x_save_path}")
+        np.savez_compressed(x_save_path, x_train_transformed=x_train_transformed)
         
         logger.info(f"Saving y_train to {y_save_path}")
-        np.save(y_save_path, y_train_heart.to_numpy())
+        np.savez_compressed(y_save_path, y_train=y_train_heart.to_numpy())
 
         # Save DictVectorizer
         logger.info(f"Saving DictVectorizer to {vec_save_path}")
         with open(vec_save_path, 'wb') as f:
+            pickle.dump(vec, f)
+        with open("app/dict_vectorizer.pkl", 'wb') as f:
             pickle.dump(vec, f)
         
         logger.info("Data transformation and saving completed successfully.")
@@ -71,12 +73,13 @@ def main():
     save_data_path = Path("data/processed/heart_train_cleaned.parquet")
     cleaned_data.to_parquet(save_data_path, index=False)
     logger.info("Cleaned data saved to 'data/processed/heart_train_cleaned.parquet'")
+    
     transform_and_save_data(
-    data=cleaned_data,
-    x_save_path=Path("data/processed/x_train_transformed.npy"),
-    y_save_path=Path("data/processed/y_train.npy"),
-    vec_save_path=Path("data/processed/dict_vectorizer.pkl")
-)
+        data=cleaned_data,
+        x_save_path=Path("data/processed/x_train_transformed.npz"),
+        y_save_path=Path("data/processed/y_train.npz"),
+        vec_save_path=Path("data/processed/dict_vectorizer.pkl")
+        )
 
 
 if __name__ == "__main__":
