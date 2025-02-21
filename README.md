@@ -15,6 +15,7 @@
 
 Heart disease remains one of the leading causes of death worldwide, with key risk factors including high blood pressure, high cholesterol, obesity, smoking, and lack of physical activity. Early detection and prediction of heart disease can play a crucial role in preventive healthcare and patient outcomes.
 
+### 🔹 Project Motivation & Objectives
 This project leverages machine learning techniques to predict the likelihood of heart disease based on self-reported health indicators collected via telephonic surveys. The dataset, sourced from the Centers for Disease Control and Prevention (CDC), is part of the Behavioral Risk Factor Surveillance System (BRFSS), which conducts annual health-related surveys across the United States.
 
 ### 📌 Project Scope
