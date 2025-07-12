@@ -216,13 +216,13 @@ make serve_local
 To containerize the model, build a **Docker image**:
 
 ```bash
-make build_docker
+make build
 ```
 
 Run the **Docker container**:
 
 ```bash
-make run_docker
+make run
 ```
 
 Once the container is running, generate predictions by executing:

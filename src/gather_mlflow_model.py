@@ -1,6 +1,7 @@
 """Script to download model artifact and save it to the local filesystem.
 This is used by the Dockerfile to build the image and deploy the model."""
 import pickle
+from pathlib import Path
 
 import yaml
 from dotenv import load_dotenv
@@ -18,7 +19,8 @@ def main():
     # Load the model
     model = load_model_by_name(f"{model_family}_best_model")
     # Save the model as pkl
-    with open("model.pkl", "wb") as file:
+    model_path = Path("model/model.pkl")
+    with open(model_path, "wb") as file:
         pickle.dump(model, file)
 
 

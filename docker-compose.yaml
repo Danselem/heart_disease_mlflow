@@ -1,6 +1,6 @@
 version: '3.7'
 
-volumes: 
+volumes:
   grafana_data: {}
   grafana-storage:
 
@@ -26,11 +26,11 @@ services:
       - "8080:8080"
     networks:
       - back-tier
-      - front-tier  
+      - front-tier
 
   grafana:
     image: grafana/grafana-enterprise
-    user: "472"
+    # Removed user to avoid permission issues (test without it first)
     ports:
       - "3000:3000"
     volumes:

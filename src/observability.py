@@ -26,22 +26,46 @@ def prep_db(conn_str: str, table_str: str, create_table_statement: str):
         table_str (str): Connection string to connect to the database.
         create_table_statement (str): SQL statement to create the table.
     """
+    # Connect to the 'postgres' database to create the new database
     conn = psycopg.connect(conn_str)
     cur = conn.cursor()
-    res = cur.execute("SELECT 1 FROM pg_database WHERE datname='test'")
-    conn.commit()
-    if len(res.fetchall()) == 0:
-        cur.execute("create database test;")
-        conn.commit()
-    conn_table = psycopg.connect(table_str)
+
+    # Commit any pending transaction to ensure we're not in a transaction block
+    # conn.commit()  # Commit any active transaction
+    conn.autocommit = True
+
+    # Check if the database 'test' already exists
+    cur.execute("SELECT 1 FROM pg_database WHERE datname='test'")
+    res = cur.fetchall()
+
+    # If the database does not exist, create it
+    if len(res) == 0:
+        cur.execute("CREATE DATABASE test;")
+        conn.commit()  # Commit the database creation
+
+    # Close the connection to the 'postgres' database
+    cur.close()
+    conn.close()
+
+    # Now connect to the newly created database 'test'
+    conn_table = psycopg.connect(table_str)  # Ensure this points to 'test' database
     cur_table = conn_table.cursor()
+
+    # Execute the create table statement
     cur_table.execute(create_table_statement)
-    conn_table.commit()
+    conn_table.commit()  # Commit the creation of the table
+
+    # Close cursors and connections
+    cur_table.close()
+    conn_table.close()
 
 
-@task
+
+@task(cache_policy="NO_CACHE")
 def calculate_metrics_postgresql(cur: psycopg.cursor,
-                                 i: int, model: object, report: object,
+                                 i: int, model: object,
+                                 dict_vectorizer: object,
+                                 report: object,
                                  reference_data: pd.DataFrame,
                                  test_data: pd.DataFrame,
                                  batch_size: int = 50):
@@ -51,6 +75,7 @@ def calculate_metrics_postgresql(cur: psycopg.cursor,
         cur (psycopg.cursor): Cursor to the database.
         i (int): Index to start the batch.
         model (object): Model to predict the data.
+        dict_vectorizer (object): Dict Vectorizer for transforming the data.
         report (object): Report object to calculate the metrics.
         reference_data (pd.DataFrame): Reference data to calculate the metrics.
         test_data (pd.DataFrame): Raw data to calculate the metrics.
@@ -64,8 +89,11 @@ def calculate_metrics_postgresql(cur: psycopg.cursor,
     # current_data.fillna(0, inplace=True)
     real_value = current_data['HadHeartAttack'].values
     current_data = current_data.drop(columns=["HadHeartAttack"])
+    
+    # Convert the DataFrame to a dictionary format expected by DictVectorizer
+    transformed_data = dict_vectorizer.transform(current_data.to_dict(orient="records"))
 
-    prediction = model.predict(current_data)
+    prediction = model.predict(transformed_data)[0]
     current_data['prediction'] = prediction
     current_data['target'] = real_value
 
@@ -95,7 +123,8 @@ def calculate_metrics_postgresql(cur: psycopg.cursor,
 
 @flow
 def batch_monitoring_backfill(table_str: str, test_data: pd.DataFrame,
-                              model: object, report: object,
+                              model: object, dict_vectorizer: object,
+                              report: object,
                               reference_data: pd.DataFrame,
                               batch_size: int = 50):
     """Flow to calculate the metrics for the test data and store them in the
@@ -104,7 +133,7 @@ def batch_monitoring_backfill(table_str: str, test_data: pd.DataFrame,
     cur = conn.cursor()
     for i in tqdm(range(0, len(test_data), batch_size),
                   desc="Calculating metrics"):
-        calculate_metrics_postgresql(cur, i, model, report,
+        calculate_metrics_postgresql(cur, i, model, dict_vectorizer, report,
                                      reference_data, test_data, batch_size)
         logging.info("data sent")
 
@@ -129,6 +158,10 @@ def main():
     test_data = pd.read_parquet('data/interim/heart_test.parquet')
     with open('model.pkl', 'rb') as f_in:
         model = pickle.load(f_in)
+        
+    # Load the DictVectorizer
+    with open('data/processed/dict_vectorizer.pkl', 'rb') as vec_file:
+        dict_vectorizer = pickle.load(vec_file)
 
     reference_data = pd.read_parquet(
         'data/processed/heart_train_cleaned.parquet')
@@ -147,9 +180,22 @@ def main():
     table_str = ("host=localhost port=5432 dbname=test "
                  "user=postgres password=example")
 
-    reference_data_preds = model.predict(reference_data.drop(columns=[
-        "HadHeartAttack"]))
-    reference_data['prediction'] = reference_data_preds
+    # reference_data_preds = model.predict(reference_data.drop(columns=[
+    #     "HadHeartAttack"]))
+    # reference_data['prediction'] = reference_data_preds
+    
+    # Drop the target column and transform the data
+    transformed_reference_data = dict_vectorizer.transform(
+        reference_data.drop(columns=["HadHeartAttack"]).to_dict(orient="records")
+    )
+
+    # Make predictions
+    reference_data_preds = model.predict(transformed_reference_data)
+
+    # Store predictions in the DataFrame
+    reference_data["prediction"] = reference_data_preds
+
+    
     # Rename the target column to 'target' to generate the report
     reference_data = reference_data.rename(
         columns={"HadHeartAttack": "target"})
@@ -159,8 +205,8 @@ def main():
         {"No": 0, "Yes": 1})
 
     prep_db(conn_str, table_str, create_table_statement)
-    batch_monitoring_backfill(table_str, test_data,
-                              model, report, reference_data, batch_size)
+    batch_monitoring_backfill(table_str, test_data, 
+                              model, dict_vectorizer, report, reference_data, batch_size)
 
 
 if __name__ == "__main__":

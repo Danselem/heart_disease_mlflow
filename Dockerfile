@@ -8,15 +8,15 @@ RUN pip install --no-cache-dir --upgrade pip
 WORKDIR /code
 
 # Copy dependencies file and install required packages
-COPY api_requirements.txt .
+COPY app/api_requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r api_requirements.txt
 
 # Copy application and model files
 COPY ./app /code/app
-COPY model.pkl .
+COPY ./app/model.pkl .
 
 # Expose port
-EXPOSE 80
+# EXPOSE 5000
 
 # Run the FastAPI app with Uvicorn
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "5000"]

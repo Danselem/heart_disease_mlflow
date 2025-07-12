@@ -11,7 +11,7 @@ def load_sample_and_predict():
         # print(sample_data)
 
     # API URL (make sure it's correct, assuming it's running locally)
-    api_url = "http://localhost:80/predict"
+    api_url = "http://localhost:5005/predict"
 
     # Make a POST request to the API with the sample data
     response = requests.post(api_url, json=sample_data)
